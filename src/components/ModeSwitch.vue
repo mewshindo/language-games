@@ -1,11 +1,10 @@
 <script setup lang="ts">
-
 import { ref } from 'vue'
 
-const props = withDefaults(
-  defineProps<{ labelOn?: string; labelOff?: string }>(),
-  { labelOn: 'On', labelOff: 'Off' }
-)
+const props = withDefaults(defineProps<{ labelOn?: string; labelOff?: string }>(), {
+  labelOn: 'On',
+  labelOff: 'Off',
+})
 
 const isEnabled = ref<boolean>(false)
 const emit = defineEmits<{
@@ -16,26 +15,30 @@ function handleChange() {
   isEnabled.value = !isEnabled.value
   emit('mode-changed', isEnabled.value)
 }
-
 </script>
 
 <template>
   <label class="switch">
-    <button type="button" class="switch" @click="handleChange">{{ isEnabled ? props.labelOn : props.labelOff }}</button>
+    <button type="button" class="switch" @click="handleChange">
+      {{ isEnabled ? props.labelOn : props.labelOff }}
+    </button>
   </label>
 </template>
 
 <style scoped>
-.switch{
+.switch {
   background-color: transparent;
   font-family: Montserrat, sans-serif;
   font-size: 1rem;
   color: inherit;
   border: none;
-  transition: color 0.5s;
+  transition: color 0.2s;
 }
-.switch:hover{
+.switch:hover {
   cursor: pointer;
   color: hsla(160, 100%, 37%, 1);
+}
+.switch:active {
+  color: hsla(160, 100%, 37%, 0.5);
 }
 </style>

@@ -17,7 +17,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 5vh;
+  min-height: 5vh;
+  max-height: 7vh;
   width: 100%;
   gap: 1.5rem;
   padding: 1rem 2rem;
