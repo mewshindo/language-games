@@ -3,6 +3,7 @@ export type LanguageInstruction = {
   label: string
   maxNumber: number
   translate(number: number): string
+  getReadings(number: number): string
   acceptedAnswers(number: number): string[]
   getNumber(number: number): LanguageNumber | undefined
 }
@@ -11,9 +12,4 @@ export type LanguageNumber = {
   name: string
   readings: string[]
   romajis: string[]
-}
-import { japanese } from './ja/ja'
-
-export const languages = {
-  japanese,
 }

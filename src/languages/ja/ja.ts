@@ -7,7 +7,7 @@ const numbers: LanguageNumber[] = [
   { number: 4, name: '四', readings: ['よん', 'し'], romajis: ['yon', 'shi'] },
   { number: 5, name: '五', readings: ['ご'], romajis: ['go'] },
   { number: 6, name: '六', readings: ['ろく'], romajis: ['roku'] },
-  { number: 7, name: '七', readings: ['しち'], romajis: ['nana'] },
+  { number: 7, name: '七', readings: ['なな', 'しち'], romajis: ['nana', 'shichi'] },
   { number: 8, name: '八', readings: ['はち'], romajis: ['hachi'] },
   { number: 9, name: '九', readings: ['きゅう'], romajis: ['kyu'] },
   { number: 10, name: '十', readings: ['じゅう'], romajis: ['ju'] },
@@ -20,27 +20,38 @@ export function getNumberByValue(value: number): LanguageNumber | undefined {
     const ones = numbers.find((n) => n.number === value - 10)
     if (!ones) return undefined
 
-    let number: LanguageNumber = {
+    return {
       number: value,
       name: '十' + ones.name,
-      readings: ['じゅう' + ones.readings[0]],
-      romajis: ['ju' + ones.romajis[0]],
+      readings: ones.readings.map((reading) => 'じゅう' + reading),
+      romajis: ones.romajis.map((romaji) => 'ju' + romaji),
     }
-    return number
   } else if (value >= 20 && value < 100) {
-    let tens = Math.floor(value / 10)
-    let ones = value % 10
+    const tens = Math.floor(value / 10)
+    const ones = value % 10
     const tensNumber = numbers.find((n) => n.number === tens)
     const onesNumber = numbers.find((n) => n.number === ones)
+
     if (!tensNumber || (ones > 0 && !onesNumber)) return undefined
 
-    let number: LanguageNumber = {
+    const readings = tensNumber.readings.flatMap((tensReading) =>
+      ones > 0
+        ? onesNumber!.readings.map((onesReading) => `${tensReading}じゅう${onesReading}`)
+        : [`${tensReading}じゅう`],
+    )
+
+    const romajis = tensNumber.romajis.flatMap((tensRomaji) =>
+      ones > 0
+        ? onesNumber!.romajis.map((onesRomaji) => `${tensRomaji}ju${onesRomaji}`)
+        : [`${tensRomaji}ju`],
+    )
+
+    return {
       number: value,
-      name: tensNumber.name + '十' + (ones > 0 ? onesNumber?.name : ''),
-      readings: [tensNumber.readings[0] + 'じゅう' + (ones > 0 ? onesNumber?.readings[0] : '')],
-      romajis: [tensNumber.romajis[0] + 'ju' + (ones > 0 ? onesNumber?.romajis[0] : '')],
+      name: tensNumber.name + '十' + (ones > 0 ? onesNumber!.name : ''),
+      readings,
+      romajis,
     }
-    return number
   }
 }
 
@@ -51,6 +62,15 @@ export const japanese: LanguageInstruction = {
   getNumber: getNumberByValue,
   translate(number) {
     return getNumberByValue(number)?.name ?? ''
+  },
+  getReadings(number) {
+    const currentNumber = getNumberByValue(number)
+    if (currentNumber?.readings != null && currentNumber.readings.length > 0) {
+      return (
+        currentNumber.readings[Math.floor(Math.random() * currentNumber.readings.length)] ?? '22'
+      )
+    }
+    return ''
   },
   acceptedAnswers(number) {
     const answers: string[] = []

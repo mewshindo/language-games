@@ -6,6 +6,13 @@
   font-weight: normal;
 }
 
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
 a,
 .green {
   text-decoration: none;
