@@ -79,9 +79,10 @@ onUnmounted(() => {
     <div class="game">
       <ruby
         >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
-        }}<rt v-if="activeLanguage.getReadings(currentNumber).length > 0">{{
-          activeLanguage.getReadings(currentNumber)
-        }}</rt></ruby
+        }}<rt
+          v-if="activeLanguage.getReadings(currentNumber).length > 0 && !isNumberToTranslation"
+          >{{ activeLanguage.getReadings(currentNumber) }}</rt
+        ></ruby
       >
       <input
         ref="inputElement"
