@@ -1,78 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref } from 'vue'
 import ModeSwitch from '@/components/ModeSwitch.vue'
 import { languages } from '@/languages'
+import { useNumbersGame } from '@/composables/useNumbersGame'
+import { useFocusModeHandler } from '@/composables/useFocusModeHandler'
+import type { LanguageInstruction } from '@/languages/types'
 
-const text = ref('')
-const activeLanguage = languages.japanese.instruction
 const activeInfoComponent = languages.japanese.infoComponent
-const numbersrange = ref(false)
-const currentNumber = ref(randomNumber())
-const isTyping = ref(false)
-const isNumberToTranslation = ref(false)
-
-function randomNumber() {
-  return numbersrange.value
-    ? Math.floor(Math.random() * 10) + 1
-    : Math.floor(Math.random() * activeLanguage.maxNumber) + 1
-}
-
-function onModeChanged(value: boolean) {
-  isNumberToTranslation.value = value
-}
-function onDifficultySelected(value: boolean) {
-  numbersrange.value = value
-  currentNumber.value = randomNumber()
-  text.value = ''
-}
-
-function submitAnswer() {
-  const answer = text.value.trim().toLowerCase()
-  if (!answer) return
-
-  const expectedAnswers = isNumberToTranslation.value
-    ? activeLanguage.acceptedAnswers(currentNumber.value)
-    : [String(currentNumber.value)]
-
-  if (expectedAnswers.some((expected) => expected.toLowerCase() === answer)) {
-    currentNumber.value = randomNumber()
-    text.value = ''
-  }
-}
+const activeLanguage: LanguageInstruction = languages.japanese.instruction
 
 const inputElement = ref<HTMLInputElement | null>(null)
 
-function focusInputOnTyping(event: KeyboardEvent) {
-  const target = event.target as HTMLElement
+const {
+  onModeChanged,
+  onDifficultySelected,
+  submitAnswer,
+  currentNumber,
+  text,
+  isNumberToTranslation,
+} = useNumbersGame(activeLanguage)
 
-  if (event.key === 'Escape') {
-    isTyping.value = false
-    return
-  }
-
-  if (
-    (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) &&
-    isTyping.value == true
-  ) {
-    return
-  }
-
-  inputElement.value?.focus()
-  isTyping.value = true
-}
-function unfocusInput() {
-  isTyping.value = false
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', focusInputOnTyping)
-  window.addEventListener('click', unfocusInput)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', focusInputOnTyping)
-  window.removeEventListener('click', unfocusInput)
-})
+const { isTyping, focusInputOnTyping } = useFocusModeHandler(inputElement)
 </script>
 
 <template>
@@ -95,7 +43,7 @@ onUnmounted(() => {
       <ruby
         >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
         }}<rt
-          v-if="activeLanguage.getReadings(currentNumber).length > 0 && !isNumberToTranslation"
+          v-show="activeLanguage.getReadings(currentNumber).length > 0 && !isNumberToTranslation"
           >{{ activeLanguage.getReadings(currentNumber) }}</rt
         ></ruby
       >
