@@ -36,7 +36,8 @@ button {
   font-weight: 800;
   text-align: center;
   background-color: var(--color-darker-than-dark);
-  padding: 4px 8px 2px 8px;
+  height: 40px;
+  padding: 0 8px 0 8px;
   margin-bottom: 5%;
   border-radius: 10px;
 }

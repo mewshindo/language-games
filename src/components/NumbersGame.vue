@@ -6,16 +6,24 @@ import { languages } from '@/languages'
 const text = ref('')
 const activeLanguage = languages.japanese.instruction
 const activeInfoComponent = languages.japanese.infoComponent
-const isNumberToTranslation = ref(false)
+const numbersrange = ref(false)
 const currentNumber = ref(randomNumber())
 const isTyping = ref(false)
+const isNumberToTranslation = ref(false)
 
 function randomNumber() {
-  return Math.floor(Math.random() * activeLanguage.maxNumber) + 1
+  return numbersrange.value
+    ? Math.floor(Math.random() * 10) + 1
+    : Math.floor(Math.random() * activeLanguage.maxNumber) + 1
 }
 
 function onModeChanged(value: boolean) {
   isNumberToTranslation.value = value
+}
+function onDifficultySelected(value: boolean) {
+  numbersrange.value = value
+  currentNumber.value = randomNumber()
+  text.value = ''
 }
 
 function submitAnswer() {
@@ -63,6 +71,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', focusInputOnTyping)
+  window.removeEventListener('click', unfocusInput)
 })
 </script>
 
@@ -74,6 +83,12 @@ onUnmounted(() => {
         :label-off="'六 ➔ 6'"
         :label="'mode'"
         @mode-changed="onModeChanged"
+      />
+      <ModeSwitch
+        :label-on="'1-10'"
+        :label-off="'1-99'"
+        :label="'range'"
+        @mode-changed="onDifficultySelected"
       />
     </div>
     <div class="game">
@@ -108,6 +123,9 @@ onUnmounted(() => {
   margin: auto;
 }
 .controls {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
   margin-top: 10%;
 }
 .game {
@@ -115,6 +133,7 @@ onUnmounted(() => {
   flex-direction: inherit;
   margin-bottom: 5%;
   margin-top: 5%;
+  min-height: 20vh;
 }
 ruby {
   font-size: 48px;
@@ -143,6 +162,7 @@ input {
   background-color: var(--color-background-soft);
   color: var(--vt-c-text-dark-2);
   caret-color: transparent;
+  font-weight: 600;
 }
 input:focus {
   outline: none;

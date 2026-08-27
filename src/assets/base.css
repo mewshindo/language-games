@@ -9,6 +9,8 @@
   --vt-c-black-soft: #222222;
   --vt-c-black-mute: #282828;
 
+  --vt-c-green: #00bd7e;
+
   --vt-c-indigo: #2c3e50;
 
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
@@ -27,6 +29,8 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
+
+  --color-green-accent: var(--vt-c-green);
 
   --color-darker-than-dark: var(--vt-c-darker-than-dark);
 
