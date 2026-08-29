@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 import os
 
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
+    f"postgresql+psycopg2://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
     f"@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}"
     f"/{os.environ['DB_NAME']}"
 )

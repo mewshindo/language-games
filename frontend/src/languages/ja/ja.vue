@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ModeSwitch from '@/components/ModeSwitch.vue'
+import ModeSwitch from '@/components/controls/StatefulButton.vue'
 import { japanese } from '@/languages/ja/ja'
 import type { LanguageNumber } from '@/languages/types'
 import { ref } from 'vue'
@@ -10,8 +10,8 @@ const numbers = Array.from({ length: 10 }, (_, index) => japanese.getNumber(inde
 
 const romaji = ref(true)
 
-function handleModeChange(value: boolean) {
-  romaji.value = value
+function handleModeChange(value: number) {
+  romaji.value = value == 1
 }
 </script>
 
@@ -35,6 +35,7 @@ function handleModeChange(value: boolean) {
     <ModeSwitch
       :label-on="'Furigana'"
       :label-off="'Romaji'"
+      :modes="['Furigana', 'Romaji']"
       :label="''"
       @mode-changed="handleModeChange"
     />

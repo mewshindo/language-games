@@ -12,7 +12,12 @@ const emit = defineEmits<{
 }>()
 
 function handleChange() {
-  mode.value + 1 <= props.modes.length -1 ? mode.value += 1 : mode.value = 0
+  if(mode.value + 1 <= props.modes.length - 1){
+    mode.value += 1
+  }
+  else{
+    mode.value = 0
+  }
   emit('mode-changed', mode.value)
 }
 </script>

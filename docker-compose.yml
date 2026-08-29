@@ -17,13 +17,33 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-  frontend:
+  frontend1:
     build: ./frontend
-    container_name: language-box-frontend
+    container_name: language-box-frontend-1
     ports:
       - "3000:80"
     depends_on:
       - backend
+    environment:
+      - APP_INDEX=1
+  frontend2:
+    build: ./frontend
+    container_name: language-box-frontend-2
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    environment:
+      - APP_INDEX=2
+  frontend3:
+    build: ./frontend
+    container_name: language-box-frontend-3
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    environment:
+      - APP_INDEX=3
   backend:
     build: ./backend
     container_name: language-box-backend

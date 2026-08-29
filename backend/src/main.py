@@ -12,15 +12,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-results = [
-    {
-        "id": 1,
-        "mode": 'numbers',
-        "language": "ja",
-        "difficulty": "1"
-    }
-]
-
 @app.post(
     "/api/users",
     response_model=UserResponse,

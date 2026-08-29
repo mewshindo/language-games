@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import ModeSwitch from '@/components/ModeSwitch.vue'
+import { computed, ref } from 'vue'
+import StatefulButton from '@/components/controls/StatefulButton.vue'
+import ResultsDisplay from '@/components/ResultsDisplay.vue'
 import { languages } from '@/languages'
 import { useNumbersGame } from '@/composables/useNumbersGame'
 import { useFocusModeHandler } from '@/composables/useFocusModeHandler'
@@ -11,28 +12,42 @@ const activeLanguage: LanguageInstruction = languages.japanese.instruction
 
 const inputElement = ref<HTMLInputElement | null>(null)
 
+const readings = computed(() => activeLanguage.getReadings(currentNumber.value))
+
 const {
   onModeChanged,
   onDifficultySelected,
-  submitAnswer,
+  onTimeframeSelected,
+  onInput,
+  restartGame,
   currentNumber,
   text,
   isNumberToTranslation,
+  remainingTime,
+  isPlaying,
+  isGameCompleted,
+  result
 } = useNumbersGame(activeLanguage)
 
-const { isTyping, focusInputOnTyping } = useFocusModeHandler(inputElement)
+const { isTyping } = useFocusModeHandler(inputElement)
 </script>
 
 <template>
   <div class="numbers-game">
+    <div class="game-container" v-show="!isGameCompleted">
     <div class="controls" :class="{ 'is-typing': isTyping }">
-      <ModeSwitch
-        :modes="['6 ➔ 六','六 ➔ 6']"
+      <StatefulButton
+      :modes="['30','15','60']"
+      :label="'timeframe'"
+      @mode-changed="onTimeframeSelected"
+      />
+      <StatefulButton
+        :modes="['六 ➔ 6', '6 ➔ 六']"
         :label="'mode'"
         @mode-changed="onModeChanged"
       />
-      <ModeSwitch
-        :modes="['1-10','1-99']"
+      <StatefulButton
+        :modes="['1-99','1-10']"
         :label="'range'"
         @mode-changed="onDifficultySelected"
       />
@@ -41,18 +56,27 @@ const { isTyping, focusInputOnTyping } = useFocusModeHandler(inputElement)
       <ruby
         >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
         }}<rt
-          v-show="activeLanguage.getReadings(currentNumber).length > 0 && !isNumberToTranslation"
-          >{{ activeLanguage.getReadings(currentNumber) }}</rt
-        ></ruby
+          v-show="readings.length > 0 && !isNumberToTranslation"
+          >{{readings}}</rt
+          ></ruby
       >
       <input
-        ref="inputElement"
-        v-model="text"
-        @keyup.enter="submitAnswer"
-        @input="submitAnswer"
-        type="text"
-        :placeholder="'Start typing...'"
+      ref="inputElement"
+      v-model="text"
+      @input="onInput"
+      type="text"
+      :placeholder="'Start typing...'"
       />
+    </div>
+    <div v-show="isPlaying">
+      <h2 class="green">{{remainingTime}}</h2>
+      <button type="button" @click="restartGame">
+        ↻
+      </button>
+    </div>
+    </div>
+    <div>
+      <ResultsDisplay v-if="isGameCompleted" :result="result"/>
     </div>
     <component :is="activeInfoComponent" class="infotable" :class="{ 'is-typing': isTyping }" />
   </div>
@@ -64,15 +88,25 @@ const { isTyping, focusInputOnTyping } = useFocusModeHandler(inputElement)
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 5%;
   width: 80vw;
+  gap: 80px;
   margin: auto;
+  min-height: fit-content;
 }
 .controls {
   display: flex;
   flex-direction: row;
   gap: 16px;
   margin-top: 10%;
+}
+.game-container{
+  display: inherit;
+  flex-direction: inherit;
+  align-items: inherit;
+  justify-content: inherit;
+  height: 60vh;
+  min-height: 200px;
+  gap: 40px;
 }
 .game {
   display: inherit;

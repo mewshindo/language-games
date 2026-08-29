@@ -40,6 +40,8 @@ __screenshots__/
 
 
 # Backend (FastAPI)
-/backend/Lib
-/backend/pyvenv.cfg
-/backend/Scripts/*.exe
+backend/Lib
+backend/Include
+backend/pyvenv.cfg
+backend/Scripts
+backend/src/__pycache__
