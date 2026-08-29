@@ -27,14 +27,12 @@ const { isTyping, focusInputOnTyping } = useFocusModeHandler(inputElement)
   <div class="numbers-game">
     <div class="controls" :class="{ 'is-typing': isTyping }">
       <ModeSwitch
-        :label-on="'6 ➔ 六'"
-        :label-off="'六 ➔ 6'"
+        :modes="['6 ➔ 六','六 ➔ 6']"
         :label="'mode'"
         @mode-changed="onModeChanged"
       />
       <ModeSwitch
-        :label-on="'1-10'"
-        :label-off="'1-99'"
+        :modes="['1-10','1-99']"
         :label="'range'"
         @mode-changed="onDifficultySelected"
       />

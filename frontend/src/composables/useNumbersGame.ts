@@ -8,19 +8,24 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
   const isNumberToTranslation = ref(false)
   const text = ref('')
 
+  const timeframe = ref(30) 
+
   function randomNumber() {
     return numbersrange.value
       ? Math.floor(Math.random() * 10) + 1
       : Math.floor(Math.random() * activeLanguage.maxNumber) + 1
   }
 
-  function onModeChanged(value: boolean) {
-    isNumberToTranslation.value = value
+  function onModeChanged(value: number) {
+    isNumberToTranslation.value = value == 0
   }
-  function onDifficultySelected(value: boolean) {
-    numbersrange.value = value
+  function onDifficultySelected(value: number) {
+    numbersrange.value = value == 0
     currentNumber.value = randomNumber()
     text.value = ''
+  }
+  function onTimeframeSelected(value: number){
+
   }
 
   function submitAnswer() {

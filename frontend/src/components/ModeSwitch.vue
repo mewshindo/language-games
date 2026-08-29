@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = withDefaults(defineProps<{ labelOn?: string; labelOff?: string; label: string }>(), {
-  labelOn: 'On',
-  labelOff: 'Off',
+const props = withDefaults(defineProps<{ modes?: string[], label: string }>(), {
+  modes: () => ['On', 'Off'],
   label: 'Mode',
 })
 
-const isEnabled = ref<boolean>(false)
+const mode = ref<number>(0)
 const emit = defineEmits<{
-  (e: 'mode-changed', value: boolean): void
+  (e: 'mode-changed', value: number): void
 }>()
 
 function handleChange() {
-  isEnabled.value = !isEnabled.value
-  emit('mode-changed', isEnabled.value)
+  mode.value + 1 <= props.modes.length -1 ? mode.value += 1 : mode.value = 0
+  emit('mode-changed', mode.value)
 }
 </script>
 
@@ -22,7 +21,7 @@ function handleChange() {
   <label class="switch">
     <div class="button-container">
       <button type="button" class="switch" @click="handleChange">
-        {{ isEnabled ? props.labelOn : props.labelOff }}
+        {{props.modes[mode]}}
       </button>
     </div>
     <h5>{{ props.label }}</h5>
