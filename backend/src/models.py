@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -12,10 +12,10 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(50), unique=True)
+    email: Mapped[str] = mapped_column(String(120), unique=True)
 
-    results: Mapped[list[Result]] = relationship(back_populates="username")
+    results: Mapped[list[Result]] = relationship(back_populates="id")
 
 
 class Result(Base):
@@ -32,7 +32,8 @@ class Result(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC)
     )
-    result: Mapped[int] = mapped_column(Integer)
-    mode: Mapped[str] = mapped_column(String(50), nullable=False)
-    language: Mapped[str] = mapped_column(String(10), nullable=False)
+    score: Mapped[int] = mapped_column(Integer)
+    game: Mapped[str] = mapped_column(String(50))
+    mode: Mapped[str] = mapped_column(String(50))
+    language: Mapped[str] = mapped_column(String(10))
     difficulty: Mapped[int] = mapped_column(Integer)
