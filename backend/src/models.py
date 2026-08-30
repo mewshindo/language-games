@@ -14,6 +14,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(120), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
 
     results: Mapped[list[Result]] = relationship(back_populates="id")
 

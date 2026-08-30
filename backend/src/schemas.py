@@ -8,7 +8,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    password: str = Field(min_length=8)
 
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True) # so that pydantic can read from the sqlalchemy model
