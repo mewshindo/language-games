@@ -35,48 +35,51 @@ const { isTyping } = useFocusModeHandler(inputElement)
 <template>
   <div class="numbers-game">
     <div class="game-container" v-show="!isGameCompleted">
-    <div class="controls" :class="{ 'is-typing': isTyping }">
-      <StatefulButton
-      :modes="['30','15','60']"
-      :label="'timeframe'"
-      @mode-changed="onTimeframeSelected"
-      />
-      <StatefulButton
-        :modes="['六 ➔ 6', '6 ➔ 六']"
-        :label="'mode'"
-        @mode-changed="onModeChanged"
-      />
-      <StatefulButton
-        :modes="['1-99','1-10']"
-        :label="'range'"
-        @mode-changed="onDifficultySelected"
-      />
+      <div class="controls" :class="{ 'is-typing': isTyping }">
+        <StatefulButton
+        :modes="['30','15','60']"
+        :label="'timeframe'"
+        @mode-changed="onTimeframeSelected"
+        />
+        <StatefulButton
+          :modes="['六 ➔ 6', '6 ➔ 六']"
+          :label="'mode'"
+          @mode-changed="onModeChanged"
+        />
+        <StatefulButton
+          :modes="['1-99','1-10']"
+          :label="'range'"
+          @mode-changed="onDifficultySelected"
+        />
+      </div>
+      <div class="game">
+        <ruby
+          >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
+          }}<rt
+            v-show="readings.length > 0 && !isNumberToTranslation"
+            >{{readings}}</rt
+            ></ruby
+        >
+        <input
+        ref="inputElement"
+        v-model="text"
+        @input="onInput"
+        type="text"
+        :placeholder="'Start typing...'"
+        />
+      </div>
     </div>
-    <div class="game">
-      <ruby
-        >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
-        }}<rt
-          v-show="readings.length > 0 && !isNumberToTranslation"
-          >{{readings}}</rt
-          ></ruby
-      >
-      <input
-      ref="inputElement"
-      v-model="text"
-      @input="onInput"
-      type="text"
-      :placeholder="'Start typing...'"
-      />
+    <div v-show="isGameCompleted">
+      <ResultsDisplay :result="result"/>
     </div>
-    <div v-show="isPlaying">
+    <div v-show="isPlaying || isGameCompleted" class="bottomControls">
       <h2 class="green">{{remainingTime}}</h2>
-      <button type="button" @click="restartGame">
-        ↻
-      </button>
-    </div>
-    </div>
-    <div>
-      <ResultsDisplay v-if="isGameCompleted" :result="result"/>
+      <div>
+        <button type="button" @click="restartGame">
+          ↻
+        </button>
+        <h4 style="margin-top: 10px;">Restart</h4>
+      </div>
     </div>
     <component :is="activeInfoComponent" class="infotable" :class="{ 'is-typing': isTyping }" />
   </div>
@@ -89,15 +92,43 @@ const { isTyping } = useFocusModeHandler(inputElement)
   align-items: center;
   justify-content: center;
   width: 80vw;
-  gap: 80px;
   margin: auto;
   min-height: fit-content;
+}
+button{
+  height: 60px;
+  width: 60px;
+  padding-bottom: 25px;
+  text-align: center;
+  background-color: var(--color-darker-than-dark);
+  border: none;
+  border-radius: 15px;
+  color: var(--vt-c-text-dark-2);
+  font-weight: 600;
+  font-size: 40px;
+  transition: color 0.2s;
+}
+button:hover {
+  cursor: pointer;
+  color: hsla(160, 100%, 37%, 1);
+}
+button:active {
+  color: hsla(0, 0%, 80%, 1);
 }
 .controls {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  min-width: 300px;
+  width: 40vw;
   gap: 16px;
   margin-top: 10%;
+}
+.bottomControls{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
 }
 .game-container{
   display: inherit;
@@ -105,14 +136,12 @@ const { isTyping } = useFocusModeHandler(inputElement)
   align-items: inherit;
   justify-content: inherit;
   height: 60vh;
-  min-height: 200px;
+  min-height: 400px;
   gap: 40px;
 }
 .game {
   display: inherit;
   flex-direction: inherit;
-  margin-bottom: 5%;
-  margin-top: 5%;
   min-height: 20vh;
 }
 ruby {

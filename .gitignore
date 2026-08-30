@@ -38,6 +38,10 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
 
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Backend (FastAPI)
 backend/Lib

@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import FastAPI, status, Depends, HTTPException
+from pydantic_settings import BaseSettings
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -8,9 +9,20 @@ import src.models as models
 from src.database import Base, engine, get_db
 from src.schemas import ResultCreate, ResultResponse, UserCreate, UserResponse
 
+class Settings(BaseSettings):
+    backend_index: str = '0'
+
+
 Base.metadata.create_all(bind=engine)
 
+settings = Settings()
 app = FastAPI()
+
+@app.get("/api/info")
+def get_info():
+    return {
+        "backend_index": settings.backend_index,
+    }
 
 @app.post(
     "/api/users",

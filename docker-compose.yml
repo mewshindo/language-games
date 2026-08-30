@@ -17,39 +17,50 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-  frontend1:
+  frontend:
     build: ./frontend
-    container_name: language-box-frontend-1
+    container_name: language-box-frontend
     ports:
       - "3000:80"
     depends_on:
-      - backend
-    environment:
-      - APP_INDEX=1
-  frontend2:
-    build: ./frontend
-    container_name: language-box-frontend-2
-    ports:
-      - "3001:80"
-    depends_on:
-      - backend
-    environment:
-      - APP_INDEX=2
-  frontend3:
-    build: ./frontend
-    container_name: language-box-frontend-3
-    ports:
-      - "3002:80"
-    depends_on:
-      - backend
-    environment:
-      - APP_INDEX=3
-  backend:
+      - backend0
+      - backend1
+      - backend2
+  backend0:
     build: ./backend
-    container_name: language-box-backend
+    container_name: language-box-backend-0
     ports:
       - "8000:8000"
     environment:
+      - BACKEND_INDEX=0
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=languagebox
+    depends_on:
+      - postgres
+  backend1:
+    build: ./backend
+    container_name: language-box-backend-1
+    ports:
+      - "8001:8000"
+    environment:
+      - BACKEND_INDEX=1
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=languagebox
+    depends_on:
+      - postgres
+  backend2:
+    build: ./backend
+    container_name: language-box-backend-2
+    ports:
+      - "8002:8000"
+    environment:
+      - BACKEND_INDEX=2
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_HOST=postgres

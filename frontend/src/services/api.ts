@@ -83,8 +83,12 @@ export interface Post {
   content: string
 }
 
-export function getPosts() {
-  return request<Post[]>('/api/posts')
+export function getResults(userId: number){
+  return request<Result[]>(`/api/results/${userId}`)
+}
+
+export function getBackendIndex(){
+  return request<string>('/api/info')
 }
 
 export async function getMotd() {

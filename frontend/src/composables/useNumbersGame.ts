@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import type { LanguageInstruction } from '@/languages/types'
+import { createResult, type CreateResultPayload } from '@/services/api'
 
 export function useNumbersGame(activeLanguage: LanguageInstruction) {
   const numbersrange = ref(false)
@@ -43,7 +44,11 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
 
       if (remainingTime.value <= 0) {
         isGameCompleted.value = true
-        result.value = (resultInternal / (60 / timeframe.value)).toString()
+        result.value = (resultInternal * (60 / timeframe.value)).toString()
+
+        const resultPayload: CreateResultPayload = {} as CreateResultPayload
+        createResult(2, resultPayload)
+
         stopGame()
       }
     }, 1000)
