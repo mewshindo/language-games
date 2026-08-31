@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/init.sql:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d languagebox"]
       interval: 10s
@@ -23,8 +23,6 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend0
-      - backend1
       - backend2
   backend0:
     build: ./backend
@@ -53,7 +51,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=languagebox
     depends_on:
-      - postgres
+      - backend0
   backend2:
     build: ./backend
     container_name: language-box-backend-2
@@ -67,7 +65,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=languagebox
     depends_on:
-      - postgres
+      - backend1
 
 volumes:
   postgres_data:
