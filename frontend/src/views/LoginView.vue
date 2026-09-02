@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ApiError, login, type LoginPayload, type Token } from '@/services/api'
+import router from '@/router'
 
 const registerValidation = computed(
   () =>
@@ -37,6 +38,7 @@ async function tryLogin() {
   try {
     tokenTry = await login(payload)
     localStorage.setItem('access_token', tokenTry.access_token)
+    router.push({path:'/'})
   } catch (error) {
     if (error instanceof ApiError) {
       emit('error-occured', error)

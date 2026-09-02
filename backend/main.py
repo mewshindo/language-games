@@ -58,8 +58,6 @@ def get_info():
         "backend_index": settings.backend_index,
     }
 
-
-
 @app.post(
     "/api/users/{user_id}/results",
     response_model=ResultResponse,
@@ -75,8 +73,9 @@ async def post_user_result(user_id: int, result: ResultCreate, db: Annotated[Asy
         )
     
     new_result = models.Result(
-        user_id=result.user_id,
+        user_id=user_id,
         score=result.score,
+        mode=result.mode,
         game=result.game,
         language=result.language,
         difficulty=result.difficulty,
@@ -85,6 +84,8 @@ async def post_user_result(user_id: int, result: ResultCreate, db: Annotated[Asy
     db.add(new_result)
     await db.commit()
     await db.refresh(new_result)
+
+    return new_result
 
 
 @app.get("/motd")

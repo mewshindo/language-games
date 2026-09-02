@@ -147,7 +147,8 @@ async def get_user_results(user_id: int, db: Annotated[AsyncSession, Depends(get
             detail="User not found",
         )
 
-    results = await db.execute(select(models.Result).where(models.Result.user_id == user_id)).scalars().all()
+    resultsquery = await db.execute(select(models.Result).where(models.Result.user_id == user_id))
+    results = resultsquery.scalars().all()
     return results
 
 @router.patch("/{user_id}", response_model=UserPrivate)

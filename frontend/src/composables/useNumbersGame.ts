@@ -1,8 +1,10 @@
 import { ref } from 'vue'
 import type { LanguageInstruction } from '@/languages/types'
-import { createResult, type CreateResultPayload } from '@/services/api'
+import { createResult, getCurrentUser, type CreateResultPayload } from '@/services/api'
 
 export function useNumbersGame(activeLanguage: LanguageInstruction) {
+  const token = localStorage.getItem('access_token')
+
   const numbersrange = ref(false)
   const currentNumber = ref(randomNumber())
   const isNumberToTranslation = ref(false)
@@ -13,8 +15,8 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
   const isGameCompleted = ref(false)
   const intervalId = ref<number | null>(null)
 
-  const result = ref('0');
-  let resultInternal = 0;
+  const result = ref('0')
+  let resultInternal = 0
 
   const timeframe = ref(30)
 
@@ -23,7 +25,6 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
       ? Math.floor(Math.random() * 10) + 1
       : Math.floor(Math.random() * activeLanguage.maxNumber) + 1
   }
-
 
   function stopGame() {
     if (intervalId.value !== null) {
@@ -45,55 +46,69 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
       if (remainingTime.value <= 0) {
         isGameCompleted.value = true
         result.value = (resultInternal * (60 / timeframe.value)).toString()
-
-        const resultPayload: CreateResultPayload = {} as CreateResultPayload
-        createResult(2, resultPayload)
-
+        if (token) {
+          sendResult()
+        }
         stopGame()
       }
     }, 1000)
   }
 
-  function restartGame(){
+  async function sendResult() {
+    if (!token) return
+
+    const user = await getCurrentUser(token)
+    if (user) {
+      {
+        const resultPayload: CreateResultPayload = {
+          mode: `${isNumberToTranslation.value ? 'numberToText' : 'textToNumber'}`,
+          language: `${activeLanguage.label}`,
+          game: 'numbers',
+          difficulty: numbersrange.value ? 1 : 2,
+          score: resultInternal * (60 / timeframe.value),
+        } as CreateResultPayload
+        createResult(user.id, resultPayload)
+      }
+    }
+  }
+
+  function restartGame() {
     stopGame()
     isPlaying.value = false
     isGameCompleted.value = false
     result.value = '0'
     resultInternal = 0
     currentNumber.value = randomNumber()
-      text.value = ''
+    text.value = ''
   }
 
   function onModeChanged(value: number) {
     isNumberToTranslation.value = value == 1
-    if(isPlaying.value){
-      stopGame();
+    if (isPlaying.value) {
+      stopGame()
     }
   }
   function onDifficultySelected(value: number) {
     numbersrange.value = value == 1
     currentNumber.value = randomNumber()
     text.value = ''
-    if(isPlaying.value){
-      stopGame();
+    if (isPlaying.value) {
+      stopGame()
     }
   }
-  function onTimeframeSelected(value: number){
-    if(value == 0)
-      timeframe.value = 30
-    if(value == 1)
-      timeframe.value = 15
-    if(value == 2)
-      timeframe.value = 60
-    remainingTime.value = timeframe.value;
-    if(isPlaying.value){
-      stopGame();
+  function onTimeframeSelected(value: number) {
+    if (value == 0) timeframe.value = 30
+    if (value == 1) timeframe.value = 15
+    if (value == 2) timeframe.value = 60
+    remainingTime.value = timeframe.value
+    if (isPlaying.value) {
+      stopGame()
     }
   }
 
   function onInput() {
-    if(!isPlaying.value && !isGameCompleted.value){
-      startGame();
+    if (!isPlaying.value && !isGameCompleted.value) {
+      startGame()
     }
     const answer = text.value.trim().toLowerCase()
     if (!answer) return
@@ -103,8 +118,8 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
       : [String(currentNumber.value)]
 
     if (expectedAnswers.some((expected) => expected.toLowerCase() === answer)) {
-      if(isPlaying.value){
-        resultInternal++;
+      if (isPlaying.value) {
+        resultInternal++
       }
       currentNumber.value = randomNumber()
       text.value = ''

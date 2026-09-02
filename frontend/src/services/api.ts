@@ -11,7 +11,9 @@ export class ApiError extends Error {
 export interface CreateResultPayload {
   mode: string
   language: string
-  difficulty: string
+  game: string
+  difficulty: number
+  score: number
 }
 
 export interface Result {
@@ -30,6 +32,13 @@ export interface Token{
   access_token: string
   token_type: string
 }
+export interface UserPublic{
+  id: number
+  username: string
+}
+export interface UserPrivate extends UserPublic{
+  email: string
+}
 
 export async function login(
   payload: LoginPayload
@@ -46,6 +55,31 @@ export async function login(
     })
   })
   if (!response.ok) {
+    let message = `Request failed with status ${response.status}`
+
+    try {
+      const body = await response.json()
+      if (typeof body.detail === 'string') {
+        message = body.detail
+      }
+    } catch {
+      // the response may not contain json
+    }
+
+    throw new ApiError(response.status, message)
+  }
+  return response.json()
+}
+
+export async function getCurrentUser(
+  token: string
+): Promise<UserPrivate>{
+  const response = await fetch(`/api/users/me`,{
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    if (!response.ok) {
     let message = `Request failed with status ${response.status}`
 
     try {

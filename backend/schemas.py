@@ -28,12 +28,19 @@ class Token(BaseModel):
     token_type: str
 
 class ResultBase(BaseModel):
+    user_id: int
     mode: str
     language: str
+    game: str
     difficulty: int
+    score: int
 
-class ResultCreate(ResultBase):
-    pass
+class ResultCreate(BaseModel):
+    mode: str
+    language: str
+    game: str
+    difficulty: int
+    score: int
 
 
 class ResultResponse(ResultBase):
@@ -41,5 +48,4 @@ class ResultResponse(ResultBase):
 
     id: int
     user_id: int
-    datetime: datetime
-    user: UserPublic
+    date: datetime
