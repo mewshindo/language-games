@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ApiError, login, type LoginPayload, type Token } from '@/services/api'
+import { useAuth } from '@/composables/useAuth'
 import router from '@/router'
+
+const { loadCurrentUser } = useAuth()
 
 const registerValidation = computed(
   () =>
@@ -38,7 +41,8 @@ async function tryLogin() {
   try {
     tokenTry = await login(payload)
     localStorage.setItem('access_token', tokenTry.access_token)
-    router.push({path:'/'})
+    await loadCurrentUser()
+    await router.push({ path: '/' })
   } catch (error) {
     if (error instanceof ApiError) {
       emit('error-occured', error)
@@ -65,7 +69,7 @@ async function tryLogin() {
       <input type="text" placeholder="email" name="email" v-model="login_email" />
       <input type="text" placeholder="password" name="password" v-model="login_password" />
       <button @click="tryLogin" :class="{ disable: !loginValidation }">sign in</button>
-      <a v-show="error_message.length > 0" style="justify-self: end;">Error: {{ error_message }}</a>
+      <a v-show="error_message.length > 0" style="justify-self: end">Error: {{ error_message }}</a>
     </div>
   </div>
 </template>

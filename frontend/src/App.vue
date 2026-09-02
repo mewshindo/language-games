@@ -1,22 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted, ref } from 'vue';
-import { getCurrentUser, type UserPrivate } from './services/api';
+import { onMounted } from 'vue'
+import { useAuth } from './composables/useAuth'
 
-const user = ref<UserPrivate>()
+const { user, loadCurrentUser } = useAuth()
 
-onMounted(async () => {
-  let token = localStorage.getItem('access_token');
-  if(token){
-    try{
-      let userQuery = await getCurrentUser(token);
-      if(userQuery){
-        user.value = userQuery;
-      }
-    }
-    catch{;}
-  }
-})
+onMounted(loadCurrentUser)
 </script>
 
 <template>
@@ -24,7 +13,7 @@ onMounted(async () => {
     <header>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/about">About</RouterLink>
-      <div style="flex-grow: 0.8;"></div>
+      <div style="flex-grow: 0.8"></div>
       <RouterLink to="/login" v-if="!user">Login</RouterLink>
       <RouterLink to="/profile" v-if="user">{{ user.username }}</RouterLink>
     </header>

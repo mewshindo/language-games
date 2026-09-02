@@ -26,7 +26,7 @@ const {
   remainingTime,
   isPlaying,
   isGameCompleted,
-  result
+  result,
 } = useNumbersGame(activeLanguage)
 
 const { isTyping } = useFocusModeHandler(inputElement)
@@ -37,9 +37,9 @@ const { isTyping } = useFocusModeHandler(inputElement)
     <div class="game-container" v-show="!isGameCompleted">
       <div class="controls" :class="{ 'is-typing': isTyping }">
         <StatefulButton
-        :modes="['30','15','60']"
-        :label="'timeframe'"
-        @mode-changed="onTimeframeSelected"
+          :modes="['30', '15', '60']"
+          :label="'timeframe'"
+          @mode-changed="onTimeframeSelected"
         />
         <StatefulButton
           :modes="['六 ➔ 6', '6 ➔ 六']"
@@ -47,7 +47,7 @@ const { isTyping } = useFocusModeHandler(inputElement)
           @mode-changed="onModeChanged"
         />
         <StatefulButton
-          :modes="['1-99','1-10']"
+          :modes="['1-99', '1-10']"
           :label="'range'"
           @mode-changed="onDifficultySelected"
         />
@@ -55,30 +55,25 @@ const { isTyping } = useFocusModeHandler(inputElement)
       <div class="game">
         <ruby
           >{{ isNumberToTranslation ? currentNumber : activeLanguage.translate(currentNumber)
-          }}<rt
-            v-show="readings.length > 0 && !isNumberToTranslation"
-            >{{readings}}</rt
-            ></ruby
+          }}<rt v-show="readings.length > 0 && !isNumberToTranslation">{{ readings }}</rt></ruby
         >
         <input
-        ref="inputElement"
-        v-model="text"
-        @input="onInput"
-        type="text"
-        :placeholder="'Start typing...'"
+          ref="inputElement"
+          v-model="text"
+          @input="onInput"
+          type="text"
+          :placeholder="'Start typing...'"
         />
       </div>
     </div>
     <div v-show="isGameCompleted">
-      <ResultsDisplay :result="result"/>
+      <ResultsDisplay :result="result" />
     </div>
     <div v-show="isPlaying || isGameCompleted" class="bottomControls">
-      <h2 class="green">{{remainingTime}}</h2>
+      <h2 class="green">{{ remainingTime }}</h2>
       <div>
-        <button type="button" @click="restartGame">
-          ↻
-        </button>
-        <h4 style="margin-top: 10px;">Restart</h4>
+        <button type="button" @click="restartGame">↻</button>
+        <h4 style="margin-top: 10px">Restart</h4>
       </div>
     </div>
     <component :is="activeInfoComponent" class="infotable" :class="{ 'is-typing': isTyping }" />
@@ -95,7 +90,7 @@ const { isTyping } = useFocusModeHandler(inputElement)
   margin: auto;
   min-height: fit-content;
 }
-button{
+button {
   height: 60px;
   width: 60px;
   padding-bottom: 25px;
@@ -124,13 +119,13 @@ button:active {
   gap: 16px;
   margin-top: 10%;
 }
-.bottomControls{
+.bottomControls {
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
 }
-.game-container{
+.game-container {
   display: inherit;
   flex-direction: inherit;
   align-items: inherit;
