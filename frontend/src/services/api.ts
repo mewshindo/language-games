@@ -24,25 +24,28 @@ export interface Result {
   created_at?: string
 }
 
-export interface LoginPayload{
+export interface LoginPayload {
   email: string
   password: string
 }
-export interface Token{
+export interface RegisterPayload {
+  username: string
+  email: string
+  password: string
+}
+export interface Token {
   access_token: string
   token_type: string
 }
-export interface UserPublic{
+export interface UserPublic {
   id: number
   username: string
 }
-export interface UserPrivate extends UserPublic{
+export interface UserPrivate extends UserPublic {
   email: string
 }
 
-export async function login(
-  payload: LoginPayload
-): Promise<Token>{
+export async function login(payload: LoginPayload): Promise<Token> {
   const response = await fetch(`/api/users/token`, {
     method: 'POST',
     headers: {
@@ -52,7 +55,7 @@ export async function login(
     body: new URLSearchParams({
       username: payload.email,
       password: payload.password,
-    })
+    }),
   })
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`
@@ -71,15 +74,13 @@ export async function login(
   return response.json()
 }
 
-export async function getCurrentUser(
-  token: string
-): Promise<UserPrivate>{
-  const response = await fetch(`/api/users/me`,{
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    if (!response.ok) {
+export async function getCurrentUser(token: string): Promise<UserPrivate> {
+  const response = await fetch(`/api/users/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  if (!response.ok) {
     let message = `Request failed with status ${response.status}`
 
     try {
@@ -96,19 +97,16 @@ export async function getCurrentUser(
   return response.json()
 }
 
-export async function createResult(
-    userId: number,
-    payload: CreateResultPayload,
-): Promise<Result>{
-    const response = await fetch(`/api/users/${userId}/results`,{
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        },
-        body: JSON.stringify(payload),
-    })
-    if (!response.ok) {
+export async function createResult(userId: number, payload: CreateResultPayload): Promise<Result> {
+  const response = await fetch(`/api/users/${userId}/results`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
     let message = `Request failed with status ${response.status}`
 
     try {
@@ -157,11 +155,11 @@ export interface Post {
   content: string
 }
 
-export function getResults(userId: number){
+export function getResults(userId: number) {
   return request<Result[]>(`/api/results/${userId}`)
 }
 
-export function getBackendIndex(){
+export function getBackendIndex() {
   return request<string>('/api/info')
 }
 

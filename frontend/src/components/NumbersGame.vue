@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import StatefulButton from '@/components/inputs/StatefulButton.vue'
 import ResultsDisplay from '@/components/ResultsDisplay.vue'
 import { languages } from '@/languages'
@@ -30,6 +30,22 @@ const {
 } = useNumbersGame(activeLanguage)
 
 const { isTyping } = useFocusModeHandler(inputElement)
+
+const scroll = ref(0)
+const guideDiscovered = ref(false)
+function handleScroll() {
+  scroll.value = window.scrollY
+  if (scroll.value > 300 && !guideDiscovered.value) {
+    guideDiscovered.value = true
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
@@ -76,7 +92,12 @@ const { isTyping } = useFocusModeHandler(inputElement)
         <h4 style="margin-top: 10px">Restart</h4>
       </div>
     </div>
-    <component :is="activeInfoComponent" class="infotable" :class="{ 'is-typing': isTyping }" />
+    <h2 :class="{ undiscovered: guideDiscovered }">Scroll down to see guide...</h2>
+    <component
+      :is="activeInfoComponent"
+      class="infotable"
+      :class="{ 'is-typing': isTyping, undiscovered: !guideDiscovered || scroll < 300 }"
+    />
   </div>
 </template>
 
@@ -180,6 +201,9 @@ input:hover {
   transition: opacity 0.2s ease;
 }
 .is-typing {
+  opacity: 0;
+}
+.undiscovered {
   opacity: 0;
 }
 </style>
