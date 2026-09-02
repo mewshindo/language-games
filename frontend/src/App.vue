@@ -29,6 +29,7 @@ header {
 
 .app {
   display: flex;
+  position: relative;
   flex-direction: column;
   max-height: 90vh;
   width: 100%;

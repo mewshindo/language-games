@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import StatefulButton from '@/components/controls/StatefulButton.vue'
+import StatefulButton from '@/components/inputs/StatefulButton.vue'
 import ResultsDisplay from '@/components/ResultsDisplay.vue'
 import { languages } from '@/languages'
 import { useNumbersGame } from '@/composables/useNumbersGame'

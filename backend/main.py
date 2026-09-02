@@ -6,25 +6,22 @@ from fastapi.exception_handlers import (
 )
 
 from fastapi import FastAPI, status, Depends, Request, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from jwt import JWT
 from pydantic_settings import BaseSettings
 import os
 from dotenv import load_dotenv
 
 from passlib.context import CryptContext
 
-from datetime import datetime, timedelta
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-import src.models as models
-from src.database import Base, engine, get_db
-from src.schemas import ResultCreate, ResultResponse, UserCreate, UserResponse
+import models as models
+from database import Base, engine, get_db
+from schemas import ResultCreate, ResultResponse, UserCreate
 
 from routers import results, users
 

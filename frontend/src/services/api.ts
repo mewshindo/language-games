@@ -22,6 +22,46 @@ export interface Result {
   created_at?: string
 }
 
+export interface LoginPayload{
+  email: string
+  password: string
+}
+export interface Token{
+  access_token: string
+  token_type: string
+}
+
+export async function login(
+  payload: LoginPayload
+): Promise<Token>{
+  const response = await fetch(`/api/users/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    },
+    body: new URLSearchParams({
+      username: payload.email,
+      password: payload.password,
+    })
+  })
+  if (!response.ok) {
+    let message = `Request failed with status ${response.status}`
+
+    try {
+      const body = await response.json()
+      if (typeof body.detail === 'string') {
+        message = body.detail
+      }
+    } catch {
+      // the response may not contain json
+    }
+
+    throw new ApiError(response.status, message)
+  }
+  return response.json()
+}
+
 export async function createResult(
     userId: number,
     payload: CreateResultPayload,

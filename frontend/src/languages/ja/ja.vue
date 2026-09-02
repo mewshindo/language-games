@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ModeSwitch from '@/components/controls/StatefulButton.vue'
+import ModeSwitch from '@/components/inputs/StatefulButton.vue'
 import { japanese } from '@/languages/ja/ja'
 import type { LanguageNumber } from '@/languages/types'
 import { ref } from 'vue'
