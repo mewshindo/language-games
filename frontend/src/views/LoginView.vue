@@ -1,55 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ApiError, login, type LoginPayload, type Token } from '@/services/api'
+import { ApiError, login, type LoginPayload, type RegisterPayload, type Token } from '@/services/api'
 import { useAuth } from '@/composables/useAuth'
 import router from '@/router'
 
-const { loadCurrentUser } = useAuth()
-
-const registerValidation = computed(
-  () =>
-    register_email.value.length > 0 &&
-    register_password.value.length > 0 &&
-    register_username.value.length > 0,
-)
-const loginValidation = computed(
-  () => login_email.value.length > 0 && login_password.value.length > 0,
-)
-
-const register_username = ref('')
-const register_email = ref('')
-const register_password = ref('')
-
-const login_email = ref('')
-const login_password = ref('')
-
-const error_message = ref('')
+const { loadCurrentUser, tryLogin, tryRegister, register_email, register_password, register_username, registerValidation, login_email, login_password, loginValidation, error_message } = useAuth()
 
 const emit = defineEmits<{
   (e: 'error-occured', value: Error): void
 }>()
-
-async function tryLogin() {
-  if (localStorage.getItem('access_token')) {
-    localStorage.removeItem('access_token')
-  }
-  const payload: LoginPayload = {
-    email: login_email.value,
-    password: login_password.value,
-  } as LoginPayload
-  let tokenTry: Token
-  try {
-    tokenTry = await login(payload)
-    localStorage.setItem('access_token', tokenTry.access_token)
-    await loadCurrentUser()
-    await router.push({ path: '/' })
-  } catch (error) {
-    if (error instanceof ApiError) {
-      emit('error-occured', error)
-      error_message.value = `${error.message}`
-    }
-  }
-}
 </script>
 
 <template>

@@ -28,21 +28,50 @@ export interface LoginPayload {
   email: string
   password: string
 }
+
 export interface RegisterPayload {
   username: string
   email: string
   password: string
 }
+
 export interface Token {
   access_token: string
   token_type: string
 }
+
 export interface UserPublic {
   id: number
   username: string
 }
+
 export interface UserPrivate extends UserPublic {
   email: string
+}
+
+export async function register(payload: RegisterPayload): Promise<Token> {
+  const response = await fetch(`/api/users/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    let message = `Request failed with status ${response.status}`
+
+    try {
+      const body = await response.json()
+      if (typeof body.detail === 'string') {
+        message = body.detail
+      }
+    } catch {
+      
+    throw new ApiError(response.status, message)
+  }
+}
+  return response.json()
 }
 
 export async function login(payload: LoginPayload): Promise<Token> {

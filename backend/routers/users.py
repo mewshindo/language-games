@@ -27,7 +27,7 @@ router = APIRouter()
 
 @router.post(
     "",
-    response_model=UserPrivate,
+    response_model=Token,
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -57,7 +57,13 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     await db.commit()
     await db.refresh(new_user)
 
-    return new_user
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires,
+    )
+    return Token(access_token=access_token, token_type="bearer")
+
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
