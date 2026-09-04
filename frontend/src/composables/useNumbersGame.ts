@@ -1,10 +1,16 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import type { LanguageInstruction } from '@/languages/types'
-import { createResult, getCurrentUser, type CreateResultPayload } from '@/services/api'
+import {
+  createResult,
+  sendRunStarted,
+  type CreateResultPayload,
+  type UserPrivate,
+} from '@/services/api'
 
-export function useNumbersGame(activeLanguage: LanguageInstruction) {
-  const token = localStorage.getItem('access_token')
-
+export function useNumbersGame(
+  activeLanguage: LanguageInstruction,
+  user: Ref<UserPrivate | undefined>,
+) {
   const numbersrange = ref(false)
   const currentNumber = ref(randomNumber())
   const isNumberToTranslation = ref(false)
@@ -37,6 +43,10 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
   function startGame() {
     stopGame()
 
+    if (user) {
+      runStarted()
+    }
+
     isPlaying.value = true
     remainingTime.value = timeframe.value
 
@@ -46,30 +56,27 @@ export function useNumbersGame(activeLanguage: LanguageInstruction) {
       if (remainingTime.value <= 0) {
         isGameCompleted.value = true
         result.value = (resultInternal * (60 / timeframe.value)).toString()
-        if (token) {
-          sendResult()
-        }
+        if (user) sendResult()
         stopGame()
       }
     }, 1000)
   }
 
-  async function sendResult() {
-    if (!token) return
+  async function runStarted() {
+    if (!user.value) return
+    await sendRunStarted(user.value.id)
+  }
 
-    const user = await getCurrentUser(token)
-    if (user) {
-      {
-        const resultPayload: CreateResultPayload = {
-          mode: `${isNumberToTranslation.value ? 'numberToText' : 'textToNumber'}`,
-          language: `${activeLanguage.label}`,
-          game: 'numbers',
-          difficulty: numbersrange.value ? 1 : 2,
-          score: resultInternal * (60 / timeframe.value),
-        } as CreateResultPayload
-        createResult(user.id, resultPayload)
-      }
-    }
+  async function sendResult() {
+    if (!user.value) return
+    const resultPayload: CreateResultPayload = {
+      mode: `${isNumberToTranslation.value ? 'numberToText' : 'textToNumber'}`,
+      language: `${activeLanguage.label}`,
+      game: 'numbers',
+      difficulty: numbersrange.value ? 1 : 2,
+      score: resultInternal * (60 / timeframe.value),
+    } as CreateResultPayload
+    createResult(user.value.id, resultPayload)
   }
 
   function restartGame() {

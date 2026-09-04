@@ -16,6 +16,13 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
+
+    created: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC)
+    )
+    total_runs: Mapped[int] = mapped_column(Integer, default=0)
+
     results: Mapped[list[Result]] = relationship(back_populates="user")
 
 

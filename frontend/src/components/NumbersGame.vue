@@ -6,9 +6,12 @@ import { languages } from '@/languages'
 import { useNumbersGame } from '@/composables/useNumbersGame'
 import { useFocusModeHandler } from '@/composables/useFocusModeHandler'
 import type { LanguageInstruction } from '@/languages/types'
+import { useAuth } from '@/composables/useAuth'
 
 const activeInfoComponent = languages.japanese.infoComponent
 const activeLanguage: LanguageInstruction = languages.japanese.instruction
+
+const { user } = useAuth()
 
 const inputElement = ref<HTMLInputElement | null>(null)
 
@@ -27,7 +30,7 @@ const {
   isPlaying,
   isGameCompleted,
   result,
-} = useNumbersGame(activeLanguage)
+} = useNumbersGame(activeLanguage, user)
 
 const { isTyping } = useFocusModeHandler(inputElement)
 

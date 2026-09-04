@@ -18,10 +18,14 @@ class UserPublic(BaseModel):
 class UserPrivate(UserPublic):
     email: EmailStr = Field(max_length=100)
 
+class UserStats(UserPrivate):
+    created: datetime
+    total_runs: int
+    completed_runs: int
+
 class UserUpdate(BaseModel):
     username: str | None = Field(default=None, min_length=1, max_length=50)
     email: EmailStr | None = Field(default=None, max_length=120)
-    image_file: str | None = Field(default=None, min_length=1, max_length=200)
 
 class Token(BaseModel):
     access_token: str

@@ -49,6 +49,12 @@ export interface UserPrivate extends UserPublic {
   email: string
 }
 
+export interface UserStats extends UserPublic {
+  created: Date
+  total_runs: number
+  completed_runs: number
+}
+
 const cache = new Map<string, { data: unknown; timestamp: number }>()
 
 interface RequestOptions extends RequestInit {
@@ -84,12 +90,17 @@ async function request<T>(route: string, options: RequestOptions): Promise<T> {
 
   if (isGET && !skipCache) {
     const cached = cache.get(cacheKey)
+    if (cached) {
+      console.log(Date.now() - cached.timestamp)
+    } else {
+      console.log('no cache')
+    }
     if (cached && Date.now() - cached.timestamp < 5000) {
+      console.log('returning cached data')
       return cached.data as T
     }
   }
 
-  // eslint-disable-next-line no-useless-assignment
   let lastError: Error | null = null
 
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -134,7 +145,10 @@ export async function login(payload: LoginPayload): Promise<Token> {
   return request<Token>('/api/users/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: JSON.stringify(payload),
+    body: new URLSearchParams({
+      username: payload.email,
+      password: payload.password,
+    }),
   })
 }
 
@@ -142,6 +156,14 @@ export async function getCurrentUser(token: string): Promise<UserPrivate> {
   return request<UserPrivate>(`/api/users/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
+    },
+  })
+}
+
+export async function getUserStats(userId: string): Promise<UserStats> {
+  return request<UserStats>(`/api/users/${userId}/stats`, {
+    headers: {
+      Accept: 'application/json',
     },
   })
 }
@@ -154,5 +176,11 @@ export async function createResult(userId: number, payload: CreateResultPayload)
       Accept: 'application/json',
     },
     body: JSON.stringify(payload),
+  })
+}
+
+export async function sendRunStarted(userId: number) {
+  return request(`/api/users/${userId}/runs`, {
+    method: 'POST',
   })
 }

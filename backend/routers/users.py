@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 import models as models
 from database import get_db
-from schemas import ResultResponse, UserCreate, UserPrivate, UserPublic, UserUpdate, Token
+from schemas import ResultCreate, ResultResponse, UserCreate, UserPrivate, UserPublic, UserStats, UserUpdate, Token
 
 from auth import (
     create_access_token,
@@ -156,6 +156,79 @@ async def get_user_results(user_id: int, db: Annotated[AsyncSession, Depends(get
     resultsquery = await db.execute(select(models.Result).where(models.Result.user_id == user_id))
     results = resultsquery.scalars().all()
     return results
+
+@router.post(
+    "/{user_id}/runs",
+    status_code=status.HTTP_201_CREATED
+)
+async def post_run_started(user_id: int, db:Annotated[AsyncSession, Depends(get_db)]):
+    userQuery = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = userQuery.scalars().first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    user.total_runs += 1
+    await db.commit()
+    await db.refresh(user)
+    return
+    
+
+@router.post(
+    "/{user_id}/results",
+    response_model=ResultResponse,
+    status_code=status.HTTP_201_CREATED
+)
+async def post_user_result(user_id: int, result: ResultCreate, db: Annotated[AsyncSession, Depends(get_db)]):
+    userQuery = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = userQuery.scalars().first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    
+    new_result = models.Result(
+        user_id=user_id,
+        score=result.score,
+        mode=result.mode,
+        game=result.game,
+        language=result.language,
+        difficulty=result.difficulty,
+    )
+
+    db.add(new_result)
+    await db.commit()
+    await db.refresh(new_result)
+
+    return new_result
+
+@router.get(
+    "/{user_id}/stats",
+    response_model=UserStats,
+)
+async def get_user_stats(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    resultsquery = await db.execute(select(models.Result).where(models.Result.user_id == user_id))
+    results = resultsquery.scalars().all()
+    completed_runs = len(results)
+    return UserStats(
+        username=user.username,
+        id=user.id,
+        email=user.email,
+        created=user.created,
+        total_runs=user.total_runs,
+        completed_runs=completed_runs
+    )
+
 
 @router.patch("/{user_id}", response_model=UserPrivate)
 async def update_user(

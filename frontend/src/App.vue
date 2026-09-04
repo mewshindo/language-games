@@ -5,7 +5,9 @@ import { useAuth } from './composables/useAuth'
 
 const { user, loadCurrentUser } = useAuth()
 
-onMounted(loadCurrentUser)
+onMounted(async () => {
+  await loadCurrentUser()
+})
 </script>
 
 <template>

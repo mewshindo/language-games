@@ -1,11 +1,9 @@
 from contextlib import asynccontextmanager
-from typing import Annotated
 from fastapi.exception_handlers import (
     http_exception_handler,
-    request_validation_exception_handler
 )
 
-from fastapi import FastAPI, status, Depends, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -15,13 +13,8 @@ from dotenv import load_dotenv
 
 from passlib.context import CryptContext
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
 import models as models
-from database import Base, engine, get_db
-from schemas import ResultCreate, ResultResponse, UserCreate
+from database import Base, engine
 
 from routers import results, users
 
@@ -49,48 +42,6 @@ app.include_router(users.router, prefix="/api/users", tags=["users"])
 
 security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-
-@app.get("/api/info")
-def get_info():
-    return {
-        "backend_index": settings.backend_index,
-    }
-
-@app.post(
-    "/api/users/{user_id}/results",
-    response_model=ResultResponse,
-    status_code=status.HTTP_201_CREATED
-)
-async def post_user_result(user_id: int, result: ResultCreate, db: Annotated[AsyncSession, Depends(get_db)]):
-    userQuery = await db.execute(select(models.User).where(models.User.id == user_id))
-    user = userQuery.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-    
-    new_result = models.Result(
-        user_id=user_id,
-        score=result.score,
-        mode=result.mode,
-        game=result.game,
-        language=result.language,
-        difficulty=result.difficulty,
-    )
-
-    db.add(new_result)
-    await db.commit()
-    await db.refresh(new_result)
-
-    return new_result
-
-
-@app.get("/motd")
-def get_motd():
-    return "Message of the day!"
 
 @app.exception_handler(StarletteHTTPException)
 async def general_http_exception_handler(
