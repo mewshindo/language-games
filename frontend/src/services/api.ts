@@ -49,42 +49,15 @@ export interface UserPrivate extends UserPublic {
   email: string
 }
 
-export async function register(payload: RegisterPayload): Promise<Token> {
-  const response = await fetch(`/api/users/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`
+const cache = new Map<string, { data: unknown; timestamp: number }>()
 
-    try {
-      const body = await response.json()
-      if (typeof body.detail === 'string') {
-        message = body.detail
-      }
-    } catch {
-      throw new ApiError(response.status, message)
-    }
-  }
-  return response.json()
+interface RequestOptions extends RequestInit {
+  retries?: number
+  retryDelay?: number
+  skipCache?: boolean
 }
 
-export async function login(payload: LoginPayload): Promise<Token> {
-  const response = await fetch(`/api/users/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    },
-    body: new URLSearchParams({
-      username: payload.email,
-      password: payload.password,
-    }),
-  })
+async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`
 
@@ -94,39 +67,87 @@ export async function login(payload: LoginPayload): Promise<Token> {
         message = body.detail
       }
     } catch {
-      // the response may not contain json
+      // response may not contain json
     }
 
     throw new ApiError(response.status, message)
   }
+
   return response.json()
 }
 
+async function request<T>(route: string, options: RequestOptions): Promise<T> {
+  const { retries = 0, retryDelay = 1000, skipCache = false, ...fetchOptions } = options
+
+  const cacheKey = `${route}-${JSON.stringify(fetchOptions)}`
+  const isGET = !fetchOptions.method || fetchOptions.method === 'GET'
+
+  if (isGET && !skipCache) {
+    const cached = cache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < 5000) {
+      return cached.data as T
+    }
+  }
+
+  // eslint-disable-next-line no-useless-assignment
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(route, {
+        ...fetchOptions,
+        headers: {
+          Accept: 'application/json',
+          ...fetchOptions.headers,
+        },
+      })
+
+      const result = await handleResponse<T>(response)
+
+      if (isGET && !skipCache) {
+        cache.set(cacheKey, { data: result, timestamp: Date.now() })
+      }
+
+      return result
+    } catch (error) {
+      lastError = error as Error
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay))
+        continue
+      }
+      throw lastError
+    }
+  }
+
+  throw lastError
+}
+
+export async function register(payload: RegisterPayload): Promise<Token> {
+  return request<Token>('/api/users/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function login(payload: LoginPayload): Promise<Token> {
+  return request<Token>('/api/users/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: JSON.stringify(payload),
+  })
+}
+
 export async function getCurrentUser(token: string): Promise<UserPrivate> {
-  const response = await fetch(`/api/users/me`, {
+  return request<UserPrivate>(`/api/users/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   })
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`
-
-    try {
-      const body = await response.json()
-      if (typeof body.detail === 'string') {
-        message = body.detail
-      }
-    } catch {
-      // the response may not contain json
-    }
-
-    throw new ApiError(response.status, message)
-  }
-  return response.json()
 }
 
 export async function createResult(userId: number, payload: CreateResultPayload): Promise<Result> {
-  const response = await fetch(`/api/users/${userId}/results`, {
+  return request<Result>(`/api/users/${userId}/results`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -134,69 +155,4 @@ export async function createResult(userId: number, payload: CreateResultPayload)
     },
     body: JSON.stringify(payload),
   })
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`
-
-    try {
-      const body = await response.json()
-      if (typeof body.detail === 'string') {
-        message = body.detail
-      }
-    } catch {
-      // the response may not contain json
-    }
-
-    throw new ApiError(response.status, message)
-  }
-  return response.json()
-}
-
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      ...options?.headers,
-    },
-  })
-
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`
-
-    try {
-      const body = await response.json()
-      if (typeof body.detail === 'string') {
-        message = body.detail
-      }
-    } catch {
-      // the response may not contain json
-    }
-
-    throw new ApiError(response.status, message)
-  }
-
-  return response.json() as Promise<T>
-}
-
-export interface Post {
-  id: number
-  content: string
-}
-
-export function getResults(userId: number) {
-  return request<Result[]>(`/api/results/${userId}`)
-}
-
-export function getBackendIndex() {
-  return request<string>('/api/info')
-}
-
-export async function getMotd() {
-  const response = await fetch('/api/motd')
-
-  if (!response.ok) {
-    throw new ApiError(response.status, `Could not load MOTD: ${response.status}`)
-  }
-
-  return response.text()
 }
