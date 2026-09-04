@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ApiError, login, type LoginPayload, type RegisterPayload, type Token } from '@/services/api'
 import { useAuth } from '@/composables/useAuth'
-import router from '@/router'
 
-const { loadCurrentUser, tryLogin, tryRegister, register_email, register_password, register_username, registerValidation, login_email, login_password, loginValidation, error_message } = useAuth()
-
-const emit = defineEmits<{
-  (e: 'error-occured', value: Error): void
-}>()
+const {
+  tryLogin,
+  tryRegister,
+  register_email,
+  register_password,
+  register_username,
+  registerValidation,
+  login_email,
+  login_password,
+  loginValidation,
+  error_message,
+} = useAuth()
 </script>
 
 <template>
@@ -18,7 +22,7 @@ const emit = defineEmits<{
       <input type="text" placeholder="username" name="username" v-model="register_username" />
       <input type="text" placeholder="email" name="email" v-model="register_email" />
       <input type="text" placeholder="password" name="password" v-model="register_password" />
-      <button :class="{ disable: !registerValidation }">sign up</button>
+      <button @click="tryRegister" :class="{ disable: !registerValidation }">sign up</button>
     </div>
     <div style="flex-grow: 0.3">
       <h2 class="or">or</h2>

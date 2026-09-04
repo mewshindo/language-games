@@ -1,5 +1,14 @@
-import { computed, ref, type Ref } from 'vue'
-import { ApiError, getCurrentUser, login, type LoginPayload, type RegisterPayload, type Token, type UserPrivate } from '@/services/api'
+import { computed, ref } from 'vue'
+import {
+  ApiError,
+  getCurrentUser,
+  login,
+  register,
+  type LoginPayload,
+  type RegisterPayload,
+  type Token,
+  type UserPrivate,
+} from '@/services/api'
 import router from '@/router'
 
 const user = ref<UserPrivate>()
@@ -19,7 +28,6 @@ async function loadCurrentUser() {
   }
 }
 
-
 const registerValidation = computed(
   () =>
     register_email.value.length > 0 &&
@@ -38,7 +46,6 @@ const login_email = ref('')
 const login_password = ref('')
 
 const error_message = ref('')
-
 
 async function tryLogin() {
   if (localStorage.getItem('access_token')) {
@@ -61,8 +68,8 @@ async function tryLogin() {
   }
 }
 
-async function tryRegister(){
-    if (localStorage.getItem('access_token')) {
+async function tryRegister() {
+  if (localStorage.getItem('access_token')) {
     localStorage.removeItem('access_token')
   }
   const payload: RegisterPayload = {
@@ -72,7 +79,7 @@ async function tryRegister(){
   } as RegisterPayload
   let tokenTry: Token
   try {
-    tokenTry = await login(payload)
+    tokenTry = await register(payload)
     localStorage.setItem('access_token', tokenTry.access_token)
     await loadCurrentUser()
     await router.push({ path: '/' })
@@ -84,7 +91,9 @@ async function tryRegister(){
 }
 
 export function useAuth() {
-  return { user, loadCurrentUser,
+  return {
+    user,
+    loadCurrentUser,
     tryLogin,
     tryRegister,
     register_email,
@@ -94,6 +103,6 @@ export function useAuth() {
     login_password,
     registerValidation,
     loginValidation,
-    error_message
-   }
+    error_message,
+  }
 }

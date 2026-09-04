@@ -53,7 +53,7 @@ export async function register(payload: RegisterPayload): Promise<Token> {
   const response = await fetch(`/api/users/register`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
       Accept: 'application/json',
     },
     body: JSON.stringify(payload),
@@ -67,10 +67,9 @@ export async function register(payload: RegisterPayload): Promise<Token> {
         message = body.detail
       }
     } catch {
-      
-    throw new ApiError(response.status, message)
+      throw new ApiError(response.status, message)
+    }
   }
-}
   return response.json()
 }
 
