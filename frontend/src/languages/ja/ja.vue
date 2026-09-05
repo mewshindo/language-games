@@ -11,7 +11,7 @@ const numbers = Array.from({ length: 10 }, (_, index) => japanese.getNumber(inde
 const romaji = ref(true)
 
 function handleModeChange(value: number) {
-  romaji.value = value == 1
+  romaji.value = value == 0
 }
 </script>
 
@@ -32,13 +32,7 @@ function handleModeChange(value: number) {
         </tr>
       </tbody>
     </table>
-    <ModeSwitch
-      :label-on="'Furigana'"
-      :label-off="'Romaji'"
-      :modes="['Furigana', 'Romaji']"
-      :label="''"
-      @mode-changed="handleModeChange"
-    />
+    <ModeSwitch :modes="['Romaji', 'Furigana']" :label="''" @mode-changed="handleModeChange" />
   </div>
 </template>
 

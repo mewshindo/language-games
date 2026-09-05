@@ -2,13 +2,15 @@
 import { useAuth } from '@/composables/useAuth'
 import { useStats } from '@/composables/useStats'
 import router from '@/router'
+import waitUntil from 'async-wait-until'
 import { onMounted } from 'vue'
 
-const { user } = useAuth()
+const { user, authLoading } = useAuth()
 
 const { username, created, total_runs, completed_runs, getStats } = useStats(user)
 
 onMounted(async () => {
+  await waitUntil(() => authLoading.value == false)
   if (!user.value) {
     router.push('/login')
   }

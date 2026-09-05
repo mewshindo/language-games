@@ -13,6 +13,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "async-wait-until": "^2.0.31",
     "jiti": "^2.7.0",
     "pinia": "^4.0.3",
     "vue": "^3.5.40",

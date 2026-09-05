@@ -18,7 +18,7 @@ export function useStats(user: Ref<UserPrivate | undefined>) {
       const date = new Date(stats.created)
       created.value = date.toDateString().substring(4)
       total_runs.value = stats.total_runs.toString()
-      completed_runs.value = stats.total_runs.toString()
+      completed_runs.value = stats.completed_runs.toString()
     } catch (error) {
       console.error(error)
     }

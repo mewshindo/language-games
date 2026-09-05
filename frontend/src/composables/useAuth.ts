@@ -12,6 +12,7 @@ import {
 import router from '@/router'
 
 const user = ref<UserPrivate>()
+const authLoading = ref(true)
 
 async function loadCurrentUser() {
   const token = localStorage.getItem('access_token')
@@ -25,6 +26,8 @@ async function loadCurrentUser() {
   } catch {
     user.value = undefined
     localStorage.removeItem('access_token')
+  } finally {
+    authLoading.value = false
   }
 }
 
@@ -93,6 +96,7 @@ async function tryRegister() {
 export function useAuth() {
   return {
     user,
+    authLoading,
     loadCurrentUser,
     tryLogin,
     tryRegister,

@@ -43,7 +43,7 @@ export function useNumbersGame(
   function startGame() {
     stopGame()
 
-    if (user) {
+    if (user.value) {
       runStarted()
     }
 
@@ -56,7 +56,7 @@ export function useNumbersGame(
       if (remainingTime.value <= 0) {
         isGameCompleted.value = true
         result.value = (resultInternal * (60 / timeframe.value)).toString()
-        if (user) sendResult()
+        if (user.value) sendResult()
         stopGame()
       }
     }, 1000)
