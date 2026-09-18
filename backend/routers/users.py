@@ -1,21 +1,21 @@
-from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, status, Response
+
+from redis_client import redis_client
+import secrets
+
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 import models as models
 from database import get_db
-from schemas import ResultCreate, ResultResponse, UserCreate, UserPrivate, UserPublic, UserStats, UserUpdate, Token
+from schemas import ResultCreate, ResultResponse, UserCreate, UserPrivate, UserPublic, UserStats, UserUpdate
 
 from auth import (
-    create_access_token,
+    get_current_user_id,
     hash_password,
-    oauth2_scheme,
-    verify_access_token,
     verify_password
 
 )
@@ -27,10 +27,13 @@ router = APIRouter()
 
 @router.post(
     "/register",
-    response_model=Token,
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
+async def create_user(
+    response: Response,
+    user: UserCreate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
     result = await db.execute(select(models.User).where(func.lower(models.User.username) == user.username.lower()))
     existing_user = result.scalars().first()
     if existing_user:
@@ -57,16 +60,30 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     await db.commit()
     await db.refresh(new_user)
 
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        data={"sub": str(new_user.id)},
-        expires_delta=access_token_expires,
+    session_id = secrets.token_urlsafe(32)
+    await redis_client.hset(
+        f"session:{session_id}",
+        mapping={"user_id": str(new_user.id)},
     )
-    return Token(access_token=access_token, token_type="bearer")
+    await redis_client.expire(
+        f"session:{session_id}",
+        settings.session_expire_minutes * 60,
+    )
+
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        secure=False,  # gotta change it to true later for HTTPS
+        samesite="lax",
+        max_age=settings.session_expire_minutes * 60,
+    )
+    return {"message": "Registered and logged in successfully!"}
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token")
 async def login_for_access_token(
+    response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
@@ -83,48 +100,59 @@ async def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=access_token_expires,
+
+    session_id = secrets.token_urlsafe(32)
+
+    await redis_client.hset(
+        f"session:{session_id}",
+        mapping={
+            "user_id": str(user.id)
+        }
     )
-    return Token(access_token=access_token, token_type="bearer")
+    await redis_client.expire(
+        f"session:{session_id}",
+        settings.session_expire_minutes * 60,
+    )
+
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        secure=False, # gotta change it to true later for HTTPS
+        samesite="lax",
+        max_age=settings.session_expire_minutes * 60,
+    )
+    return {"message": "Logged in successfully!"}
     
 @router.get(
     "/me",
     response_model=UserPrivate
 )
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user_id: Annotated[int, Depends(get_current_user_id)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
     result = await db.execute(
-        select(models.User).where(models.User.id == user_id_int),
+        select(models.User).where(models.User.id == user_id),
     )
     user = result.scalars().first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    session_id: str | None = Cookie(default=None)
+):
+    if session_id:
+        await redis_client.delete(f"session:{session_id}")
+
+    response.delete_cookie("session_id")
+    return {"message": "Logged out"}
 
 @router.get(
     "/{user_id}",

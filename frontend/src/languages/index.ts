@@ -1,4 +1,4 @@
-import JapaneseInfo from './ja/ja.vue'
+import JapaneseInfo from './ja/ja-guide.vue'
 import { japanese } from './ja/ja'
 
 export const languages = {

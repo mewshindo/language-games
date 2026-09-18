@@ -1,7 +1,10 @@
 from datetime import UTC, datetime, timedelta
 
 import jwt
+from fastapi import Cookie, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from redis_client import redis_client
+
 from pwdlib import PasswordHash
 
 from config import settings
@@ -15,6 +18,28 @@ def hash_password(password:str) -> str:
 
 def verify_password(plain_password:str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
+
+async def get_current_user_id(
+    session_id: str | None = Cookie(default=None),
+) -> int:
+    if not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
+    user_id = await redis_client.hget(
+        f"session:{session_id}",
+        "user_id",
+    )
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session"
+        )
+    
+    return int(user_id)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()

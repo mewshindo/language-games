@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: language-box-redis
+    ports:
+      - "6379:6379"
   postgres:
     image: postgres:15
     container_name: database
@@ -31,11 +36,6 @@ services:
       - "8000:8000"
     environment:
       - BACKEND_INDEX=0
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=languagebox
     depends_on:
       - postgres
   backend1:
@@ -45,11 +45,6 @@ services:
       - "8001:8000"
     environment:
       - BACKEND_INDEX=1
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=languagebox
     depends_on:
       - backend0
   backend2:
@@ -59,11 +54,6 @@ services:
       - "8002:8000"
     environment:
       - BACKEND_INDEX=2
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=languagebox
     depends_on:
       - backend1
 
