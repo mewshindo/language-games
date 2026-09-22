@@ -24,20 +24,15 @@ export interface Result {
   created_at?: string
 }
 
-export interface LoginPayload {
-  email: string
-  password: string
-}
-
 export interface RegisterPayload {
   username: string
   email: string
   password: string
 }
 
-export interface Token {
-  access_token: string
-  token_type: string
+export interface LoginPayload {
+  email: string
+  password: string
 }
 
 export interface UserPublic {
@@ -107,6 +102,7 @@ async function request<T>(route: string, options: RequestOptions): Promise<T> {
     try {
       const response = await fetch(route, {
         ...fetchOptions,
+        credentials: 'include',
         headers: {
           Accept: 'application/json',
           ...fetchOptions.headers,
@@ -133,16 +129,16 @@ async function request<T>(route: string, options: RequestOptions): Promise<T> {
   throw lastError
 }
 
-export async function register(payload: RegisterPayload): Promise<Token> {
-  return request<Token>('/api/users/register', {
+export async function register(payload: RegisterPayload): Promise<string> {
+  return request<string>('/api/users/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
 }
 
-export async function login(payload: LoginPayload): Promise<Token> {
-  return request<Token>('/api/users/token', {
+export async function login(payload: LoginPayload): Promise<string> {
+  return request<string>('/api/users/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -152,12 +148,14 @@ export async function login(payload: LoginPayload): Promise<Token> {
   })
 }
 
-export async function getCurrentUser(token: string): Promise<UserPrivate> {
-  return request<UserPrivate>(`/api/users/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+export async function logout(): Promise<string> {
+  return request<string>('/api/users/logout', {
+    method: 'POST',
   })
+}
+
+export async function getCurrentUser(): Promise<UserPrivate> {
+  return request<UserPrivate>(`/api/users/me`, {})
 }
 
 export async function getUserStats(userId: string): Promise<UserStats> {
