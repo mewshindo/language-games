@@ -13,16 +13,48 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+h1{
+  font-family: "Grandstander", cursive;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 48px;
+}
+h2, h3, h4, h5, a, ruby, rt{
+  font-family: "Roboto Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+h2{
+  font-size: 36px;
+}
+h3{
+  font-size: 32px;
+}
+h4, a{
+  font-size: 20px;
+  color: var(--color-accent-regular);
+}
+h5{
+  font-size: 20px;
+  color: var(--color-background-contrast);
+}
+rt{
+  margin-bottom: 8px;
+}
+
 a,
 .green {
   text-decoration: none;
-  color: #00bd7e;
   transition: 0.4s;
   padding: 3px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    background-color: #52593F;
   }
 }

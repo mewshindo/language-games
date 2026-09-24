@@ -7,19 +7,22 @@ import { onMounted } from 'vue'
 
 const { user, authLoading } = useAuth()
 
-const { username, created, total_runs, completed_runs, getStats } = useStats(user)
+const { username, created, total_runs, completed_runs, statsLoading, getStats } = useStats(user)
 
 onMounted(async () => {
   await waitUntil(() => authLoading.value == false)
   if (!user.value) {
     router.push('/login')
   }
-  await getStats()
+  getStats()
 })
 </script>
 
 <template>
-  <div>
+  <div v-show="statsLoading">
+    <h1>Loading...</h1>
+  </div>
+  <div v-show="!statsLoading">
     <h1>{{ username }}</h1>
     <h2>Joined: {{ created }}</h2>
     <h2>Total runs: {{ total_runs }}</h2>

@@ -61,11 +61,10 @@ input,
 button {
   height: 40px;
   font-size: 20px;
-  padding: 8px;
-  background-color: var(--color-background);
-  border: 2px solid var(--color-border);
+  padding: 10px;
+  background-color: var(--color-darker-than-dark);
+  border: 2px solid var(--color-background-contrast);
   border-radius: 8px;
-  color: var(--color-text);
   margin-bottom: 8px;
 }
 input,

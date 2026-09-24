@@ -2,6 +2,8 @@ import { getUserStats, type UserPrivate } from '@/services/api'
 import { ref, type Ref } from 'vue'
 
 export function useStats(user: Ref<UserPrivate | undefined>) {
+  const statsLoading = ref<boolean>(true)
+
   const username = ref<string>()
   const created = ref<string>()
   const total_runs = ref<string>()
@@ -21,10 +23,13 @@ export function useStats(user: Ref<UserPrivate | undefined>) {
       completed_runs.value = stats.completed_runs.toString()
     } catch (error) {
       console.error(error)
+    } finally {
+      statsLoading.value = false
     }
   }
 
   return {
+    statsLoading,
     username,
     created,
     total_runs,

@@ -15,7 +15,7 @@ onMounted(async () => {
     <header>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/about">About</RouterLink>
-      <div style="flex-grow: 0.8"></div>
+      <div style="flex-grow: 0.7"></div>
       <RouterLink to="/login" v-if="!user">Login</RouterLink>
       <RouterLink to="/profile" v-if="user">{{ user.username }}</RouterLink>
     </header>
@@ -28,12 +28,12 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60px;
+  height: 120px;
   width: 100%;
   gap: 1.5rem;
   padding: 1rem 2rem;
   background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-background-soft);
 }
 
 .app {

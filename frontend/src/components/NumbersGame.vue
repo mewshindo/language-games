@@ -95,7 +95,7 @@ onUnmounted(() => {
         <h4 style="margin-top: 10px">Restart</h4>
       </div>
     </div>
-    <h2 :class="{ undiscovered: guideDiscovered }">Scroll down to see guide...</h2>
+    <h5 :class="{ undiscovered: guideDiscovered }">Scroll down to see guide...</h5>
     <component
       :is="activeInfoComponent"
       class="infotable"
@@ -187,7 +187,7 @@ input {
   width: 300px;
   text-align: center;
   border: none;
-  background-color: var(--color-background-soft);
+  background-color: transparent;
   color: var(--vt-c-text-dark-2);
   caret-color: transparent;
   font-weight: 600;
